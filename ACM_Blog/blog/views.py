@@ -1,12 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from .models import Post
-from .forms import PostForm
+from .forms import PostForm, UserForm
 from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login, logout
+from django.views import generic
+from django.views.generic import View
 
 def post_list(request):
-    posts = Post.objects.all().order_by('published_date')
-    return render(request, 'blog/post_list.html', {'posts': posts})
+    if request.user.is_authenticated():
+        posts = Post.objects.all().order_by('published_date')
+        return render(request, 'blog/post_list.html', {'posts': posts})
+    if not request.user.is_authenticated():
+        return render(request, 'blog/login.html')
 
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -38,3 +44,48 @@ def post_new(request):
     else:
         form = PostForm()
     return render(request, 'blog/post_edit.html', {'form': form})
+
+def logout_user(request):
+    logout(request)
+    form = UserForm(request.POST or None)
+    context = {
+        "form": form,
+    }
+    return render(request, 'blog/login.html', context)
+
+
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                posts = Post.objects.all().order_by('published_date')
+                return render(request, 'blog/post_list.html', {'posts': posts})
+            else:
+                return render(request, 'blog/login.html', {'error_message': 'Your account has been disabled'})
+        else:
+            return render(request, 'blog/login.html', {'error_message': 'Invalid login'})
+    return render(request, 'blog/login.html')
+
+
+def register(request):
+    form = UserForm(request.POST or None)
+    if form.is_valid():
+        user = form.save(commit=False)
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user.set_password(password)
+        user.save()
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                posts = Post.objects.all().order_by('published_date')
+                return render(request, 'blog/post_list.html', {'posts': posts})
+    context = {
+        "form": form,
+    }
+    return render(request, 'blog/register.html', context)
