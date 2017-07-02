@@ -10,6 +10,12 @@
     <body>
         <div class="page-header">
             <h1><a href="/">WELCOME TO BITS ACM's Blog</a></h1>
+			{% if user in users %}
+				<h5>logged in as:{{ user.username }}</h5>
+				<h5><a href="{% url 'logout_user' %}">logout</a></h5>
+			{% else %}
+				<h5><a href="{% url 'login_user' %}">Login</a><a href="{% url 'register' %}">Register</a></h5>
+			{% endif %}
 			<a href="{% url 'post_new' %}" class="top-menu"><h3>Add new post</h3><span class="glyphicon glyphicon-plus"></span></a>
         </div>
         <div class="content container">
