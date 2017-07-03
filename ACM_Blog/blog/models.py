@@ -20,3 +20,11 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Avatar(models.Model):
+    userprof = models.ForeignKey(User)
+    profile_image = models.ImageField(upload_to = 'images/', default = 'images/default.jpg')
+
+    
+    def __str__(self):
+        return self.userprof.username

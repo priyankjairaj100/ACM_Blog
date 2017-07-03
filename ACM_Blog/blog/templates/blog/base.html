@@ -12,6 +12,8 @@
             <h1><a href="/">WELCOME TO BITS ACM's Blog</a></h1>
 			{% if user in users %}
 				<h5>logged in as:{{ user.username }}</h5>
+				<img src="{{avatar.profile_image.url}}" alt="Smiley face" height="42" width="42">
+
 				<h5><a href="{% url 'logout_user' %}">logout</a></h5>
 				<a href="{% url 'post_new' %}" class="top-menu"><h3>Add new post</h3><span class="glyphicon glyphicon-plus"></span></a>
 			{% else %}
