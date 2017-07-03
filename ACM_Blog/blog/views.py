@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import generic
 from django.views.generic import View
 from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
 
 def post_list(request):
     #if request.user.is_authenticated():
@@ -32,9 +33,12 @@ def post_edit(request, pk):
                 post.save()
                 return redirect('post_detail', pk=post.pk)
         else:
-                form = PostForm(instance=post)
-                return render(request, 'blog/post_edit.html', {'form': form})
-
+                if request.user == post.author:
+                        form = PostForm(instance=post)
+                        return render(request, 'blog/post_edit.html', {'form': form})
+                else:
+                        return HttpResponseForbidden()
+            
 
 def post_new(request):
     if request.method == "POST":
