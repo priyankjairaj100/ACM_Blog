@@ -7,6 +7,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import generic
 from django.views.generic import View
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
+
 
 def post_list(request):
     #if request.user.is_authenticated():
@@ -85,3 +87,15 @@ def register(request):
                 return redirect('post_list')
 
     return render(request, 'blog/register.html',{'form':form})
+
+
+def uploadfile(request):
+    if request.method == 'POST' and request.FILES["myfile"]:
+        myfile = request.FILES["myfile"]
+        fs = FileSystemStorage()
+        filename = fs.save(myfile.name, myfile)
+        image = fs.url(filename)
+        return render(request, 'blog/fileupload.html', {
+            'uploaded_file_url': image,
+        })
+    return render(request, 'blog/fileupload.html')
